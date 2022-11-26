@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Play } from 'phosphor-react'
@@ -32,8 +33,18 @@ const newCycleFormValidationSchema = zod.object({
 
 type NewCycleFormData = zod.infer<typeof newCycleFormValidationSchema>
 
+interface Cycle {
+  id: string
+  task: string
+  minutesAmount: number
+}
+
 export function Home() {
-  const { register, handleSubmit, watch } = useForm<NewCycleFormData>({
+  // Sempre iniciar um estado com uma informação do mesmo tipo da qual vou manusear
+  const [cycles, setCycles] = useState<Cycle[]>([])
+  const [activeCycleId, setactiveCycleId] = useState<string | null>(null)
+
+  const { register, handleSubmit, watch, reset } = useForm<NewCycleFormData>({
     resolver: zodResolver(newCycleFormValidationSchema),
     defaultValues: {
       task: '',
@@ -50,8 +61,24 @@ export function Home() {
   // toda vez que um estado é alterado, ele é renderizado novamente, com uma interface muito complexa as vezes se torna um gargalo
 
   function handleCreateNewCycle(data: NewCycleFormData) {
-    console.log(data)
+    const id = String(new Date().getTime())
+
+    const newCycle: Cycle = {
+      id,
+      task: data.task,
+      minutesAmount: data.minutesAmount,
+    }
+
+    setCycles((state) => [...state, newCycle])
+    setactiveCycleId(id)
+
+    reset()
+    // Aqui o reset funciona resetanto os falores default que estão no resolver, se esquecer de algum ele não voltará para o valor original
   }
+
+  const activeCycle = cycles.find((cycle) => cycle.id === activeCycleId)
+
+  console.log(activeCycle)
 
   const task = watch('task')
   const isSubmitDisabled = !task
