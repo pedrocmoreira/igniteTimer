@@ -21,9 +21,24 @@ const newCycleFormValidationSchema = zod.object({
     .max(60, 'O ciclo precisa ser de no máximo 60 minutos'),
 })
 
+// interface quando vou criar alguma definiçao de objeto, type para quando vou criar uma tipagem a partir de alguma outra referência
+
+// sempre que for referenciar alguma coisa em javascript dentro do typescript usar o typeof
+
+// interface NewCycleFormData {
+//   task: string
+//   minutesAmount: number
+// }
+
+type NewCycleFormData = zod.infer<typeof newCycleFormValidationSchema>
+
 export function Home() {
-  const { register, handleSubmit, watch } = useForm({
+  const { register, handleSubmit, watch } = useForm<NewCycleFormData>({
     resolver: zodResolver(newCycleFormValidationSchema),
+    defaultValues: {
+      task: '',
+      minutesAmount: 0,
+    },
   })
 
   // método register adiciona um novo input, ou seja, quais são as infos que quero mandar
@@ -34,7 +49,7 @@ export function Home() {
 
   // toda vez que um estado é alterado, ele é renderizado novamente, com uma interface muito complexa as vezes se torna um gargalo
 
-  function handleCreateNewCycle(data: any) {
+  function handleCreateNewCycle(data: NewCycleFormData) {
     console.log(data)
   }
 
